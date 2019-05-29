@@ -1,21 +1,33 @@
 const express = require('express');
-const db = require('./userDb');
+const userDB = require('./userDb');
+const postDB = require('../posts/postDb');
 const validateUser = require('../middleware/validateUser');
+const validatePost = require('../middleware/validatePost');
 const validateUserId = require('../middleware/validateUserId');
 
 const router = express.Router();
 router.use(express.json());
 
 router.post('/', validateUser, async (req, res) => {
-  // Unique key not handled correctly here on backend
-  const user = await db.insert(req.body);
-  res.status(201).json(user);
+  try {
+    const user = await userDB.insert(req.body);
+    res.status(201).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      // possibly not unique, clean and send
+      message: 'Unknown server error creating new user',
+    });
+  }
 });
 
-router.post('/:id/posts', validateUserId, async (req, res) => {
+router.post('/:id/posts', validatePost, async (req, res) => {
   try {
-    const posts = await db.getUserPosts(req.user.id);
-    res.json(posts);
+    const post = await postDB.insert({
+      ...req.body,
+      user_id: req.user.id,
+    });
+    res.status(201).json(post);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -25,7 +37,7 @@ router.post('/:id/posts', validateUserId, async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  const users = await db.get();
+  const users = await userDB.get();
   res.json(users);
 });
 
@@ -42,7 +54,7 @@ router.get('/:id', validateUserId, async (req, res) => {
 
 router.get('/:id/posts', validateUserId, async (req, res) => {
   try {
-    const posts = await db.getUserPosts(req.user.id);
+    const posts = await userDB.getUserPosts(req.user.id);
     res.json(posts);
   } catch (error) {
     console.log(error);
@@ -54,7 +66,7 @@ router.get('/:id/posts', validateUserId, async (req, res) => {
 
 router.delete('/:id', validateUserId, async (req, res) => {
   try {
-    await db.remove(req.user.id);
+    await userDB.remove(req.user.id);
     res.json(req.user);
   } catch (error) {
     console.log(error);
@@ -65,17 +77,11 @@ router.delete('/:id', validateUserId, async (req, res) => {
 });
 
 router.put('/:id', validateUserId, async (req, res) => {
-  await db.update(req.user.id, req.body);
+  await userDB.update(req.user.id, req.body);
   res.json({
     ...req.user,
     ...req.body,
   });
 });
-
-//custom middleware
-
-function validatePost(req, res, next) {
-
-};
 
 module.exports = router;

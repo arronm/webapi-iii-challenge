@@ -3,6 +3,7 @@ const helmet = require('helmet');
 
 const logger = require('./middleware/logger');
 const users = require('./users/userRouter');
+const posts = require('./posts/postRouter');
 
 const PORT = 4444;
 const server = express();
@@ -27,15 +28,5 @@ server.get('/', (req, res) => {
 // user routes
 server.use('/api/users', users);
 
-// GET /api/users
-
-// POST /api/users
-// validateUser
-
-// DELETE /api/users/:id
-// validateUserId
-
-// PUT /api/users/:id
-// validateUserId
-
 // post routes
+server.use('/api/posts', posts);
