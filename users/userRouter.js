@@ -13,9 +13,15 @@ router.post('/', validateUser, async (req, res) => {
 });
 
 router.post('/:id/posts', validateUserId, async (req, res) => {
-  res.json({
-    user: req.user,
-  });
+  try {
+    const posts = await db.getUserPosts(req.user.id);
+    res.json(posts);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error creating new posts for user by id',
+    });
+  }
 });
 
 router.get('/', async (req, res) => {
@@ -24,21 +30,46 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', validateUserId, async (req, res) => {
+  try {
+    res.json(req.user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error getting user by id',
+    });
+  }
+});
+
+router.get('/:id/posts', validateUserId, async (req, res) => {
+  try {
+    const posts = await db.getUserPosts(req.user.id);
+    res.json(posts);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error getting user posts by user id',
+    });
+  }
+});
+
+router.delete('/:id', validateUserId, async (req, res) => {
+  try {
+    await db.remove(req.user.id);
+    res.json(req.user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error removing user by id.',
+    });
+  }
+});
+
+router.put('/:id', validateUserId, async (req, res) => {
+  await db.update(req.user.id, req.body);
   res.json({
-    user: req.user,
+    ...req.user,
+    ...req.body,
   });
-});
-
-router.get('/:id/posts', (req, res) => {
-
-});
-
-router.delete('/:id', (req, res) => {
-
-});
-
-router.put('/:id', (req, res) => {
-
 });
 
 //custom middleware
