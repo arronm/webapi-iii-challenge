@@ -1,7 +1,6 @@
 const express = require('express');
 
 const db = require('./postDb');
-const validatePost = require('../middleware/validatePost');
 const validatePostId = require('../middleware/validatePostId');
 
 const router = express.Router();
@@ -10,14 +9,6 @@ router.use(express.json());
 router.get('/', async (req, res) => {
   const posts = await db.get();
   res.json(posts);
-});
-
-router.post('/:id', validatePost, async (req, res) => {
-  const post = await db.insert({
-    ...req.body,
-    user_id: req.user.id,
-  });
-  res.status(201).json(post);
 });
 
 router.get('/:id', validatePostId, async (req, res) => {
@@ -42,7 +33,14 @@ router.delete('/:id', validatePostId, async (req, res) => {
 });
 
 router.put('/:id', validatePostId, async (req, res) => {
-
+  const post = await db.update(req.params.id, {
+    ...req.post,
+    ...req.body,
+  });
+  res.json({
+    ...req.post,
+    ...req.body,
+  });
 });
 
 module.exports = router;
