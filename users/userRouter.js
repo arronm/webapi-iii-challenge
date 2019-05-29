@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('./userDb');
 const validateUser = require('../middleware/validateUser');
+const validateUserId = require('../middleware/validateUserId');
 
 const router = express.Router();
 router.use(express.json());
@@ -11,8 +12,10 @@ router.post('/', validateUser, async (req, res) => {
   res.status(201).json(user);
 });
 
-router.post('/:id/posts', validateUserId,async (req, res) => {
-
+router.post('/:id/posts', validateUserId, async (req, res) => {
+  res.json({
+    user: req.user,
+  });
 });
 
 router.get('/', async (req, res) => {
@@ -20,8 +23,10 @@ router.get('/', async (req, res) => {
   res.json(users);
 });
 
-router.get('/:id', (req, res) => {
-
+router.get('/:id', validateUserId, async (req, res) => {
+  res.json({
+    user: req.user,
+  });
 });
 
 router.get('/:id/posts', (req, res) => {
@@ -37,10 +42,6 @@ router.put('/:id', (req, res) => {
 });
 
 //custom middleware
-
-function validateUserId(req, res, next) {
-
-};
 
 function validatePost(req, res, next) {
 
