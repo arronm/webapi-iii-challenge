@@ -7,12 +7,26 @@ const router = express.Router();
 router.use(express.json());
 
 router.get('/', async (req, res) => {
-  const posts = await db.get();
-  res.json(posts);
+  try {
+    const posts = await db.get();
+    res.json(posts);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error getting posts',
+    });
+  }
 });
 
 router.get('/:id', validatePostId, async (req, res) => {
-  res.json(req.post);
+  try {
+    res.json(req.post);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error getting post by id',
+    });
+  }
 });
 
 router.delete('/:id', validatePostId, async (req, res) => {
@@ -33,14 +47,21 @@ router.delete('/:id', validatePostId, async (req, res) => {
 });
 
 router.put('/:id', validatePostId, async (req, res) => {
-  const post = await db.update(req.params.id, {
-    ...req.post,
-    ...req.body,
-  });
-  res.json({
-    ...req.post,
-    ...req.body,
-  });
+  try {
+    await db.update(req.params.id, {
+      ...req.post,
+      ...req.body,
+    });
+    res.json({
+      ...req.post,
+      ...req.body,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error updating post by id',
+    });
+  }
 });
 
 module.exports = router;

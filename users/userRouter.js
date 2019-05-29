@@ -15,7 +15,6 @@ router.post('/', validateUser, async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      // possibly not unique, clean and send
       message: 'Unknown server error creating new user',
     });
   }
@@ -37,8 +36,15 @@ router.post('/:id/posts', validatePost, async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  const users = await userDB.get();
-  res.json(users);
+  try {
+    const users = await userDB.get();
+    res.json(users);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error getting users',
+    });
+  }
 });
 
 router.get('/:id', validateUserId, async (req, res) => {
@@ -77,11 +83,18 @@ router.delete('/:id', validateUserId, async (req, res) => {
 });
 
 router.put('/:id', validateUserId, async (req, res) => {
-  await userDB.update(req.user.id, req.body);
-  res.json({
-    ...req.user,
-    ...req.body,
-  });
+  try {
+    await userDB.update(req.user.id, req.body);
+    res.json({
+      ...req.user,
+      ...req.body,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Unknown server error updating user',
+    });
+  }
 });
 
 module.exports = router;
